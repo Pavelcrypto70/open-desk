@@ -565,9 +565,9 @@
       const key = `${task.id}:${ping.at}`;
       if (sentPings[key]) continue;
 
-      const text = `⏰ OpsDesk · ${col.title}\n${task.title}\n${ping.note || ""}\n(${formatWhen(ping.at)})`.trim();
+      const text = `⏰ Томский завод · ${col.title}\n${task.title}\n${ping.note || ""}\n(${formatWhen(ping.at)})`.trim();
       try {
-        await maybeNotifyBrowser("OpsDesk · пинг", `${col.title}: ${ping.note || task.title}`);
+        await maybeNotifyBrowser("Томский завод · пинг", `${col.title}: ${ping.note || task.title}`);
         if (settings.botNotify) await sendTelegram(text);
         sentPings[key] = now;
         saveSent();
@@ -763,7 +763,7 @@
     settings.botToken = document.getElementById("sToken").value.trim();
     settings.chatId = document.getElementById("sChat").value.trim();
     try {
-      await sendTelegram("OpsDesk ✓ тест. Если видишь это — пинги дойдут.");
+      await sendTelegram("Томский завод ✓ тест. Если видишь это — пинги дойдут.");
       toast("Тест отправлен");
     } catch (err) {
       toast(`Ошибка: ${err.message}`);

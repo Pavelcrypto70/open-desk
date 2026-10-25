@@ -98,9 +98,9 @@ body {
 .brand {
   font-family: var(--display);
   font-weight: 800;
-  font-size: clamp(1.95rem, 3.2vw, 2.6rem);
-  letter-spacing: -0.04em;
-  line-height: 0.95;
+  font-size: clamp(1.55rem, 2.8vw, 2.25rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
   color: var(--ink);
 }
 
@@ -400,8 +400,8 @@ body {
   .lede { display: none; }
 
   .brand {
-    font-size: 1.45rem;
-    letter-spacing: -0.03em;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
   }
 
   .top-actions {
