@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ops Desk · личный дашборд</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#07090d" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="atmosphere" aria-hidden="true"></div>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <div class="brand">OPS<span>DESK</span></div>
+        <p class="lede">Четыре направления. Текущие и закрытые задачи. Пинги в Telegram, чтобы ничего не сорвалось.</p>
+      </div>
+      <div class="top-actions">
+        <button type="button" class="btn primary" id="btnAdd">+ Задача</button>
+        <button type="button" class="btn" id="btnSettings">Telegram</button>
+        <button type="button" class="btn ghost" id="btnExport">Экспорт</button>
+        <button type="button" class="btn ghost" id="btnImport">Импорт</button>
+        <button type="button" class="btn danger ghost" id="btnReset" title="Затереть локальные правки seed-ом">Сброс seed</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden />
+      </div>
+    </header>
+
+    <div class="ping-strip" id="pingStrip" aria-label="Ближайшие Telegram-пинги"></div>
+    <main class="board" id="board"></main>
+  </div>
+
+  <div class="modal-backdrop" id="taskModal" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+    <div class="modal">
+      <h2 id="taskModalTitle">Задача</h2>
+      <form id="taskForm">
+        <input type="hidden" id="fId" />
+        <div class="field">
+          <label for="fColumn">Направление</label>
+          <select id="fColumn" required></select>
+        </div>
+        <div class="field">
+          <label for="fTrack">Поток</label>
+          <select id="fTrack" required></select>
+        </div>
+        <div class="field">
+          <label for="fTitle">Суть задачи</label>
+          <input id="fTitle" required maxlength="240" placeholder="Что сделать" />
+        </div>
+        <div class="field">
+          <label for="fNotes">Заметки</label>
+          <textarea id="fNotes" maxlength="2000" placeholder="Контекст, ссылки, критерии готовности"></textarea>
+        </div>
+        <div class="row-2">
+          <div class="field">
+            <label for="fPriority">Приоритет</label>
+            <select id="fPriority">
+              <option value="1">P1 — срочно</option>
+              <option value="2" selected>P2 — важно</option>
+              <option value="3">P3 — когда будет</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fStatus">Статус</label>
+            <select id="fStatus">
+              <option value="open">Текущая</option>
+              <option value="done">Закрыта</option>
+            </select>
+          </div>
+        </div>
+        <div class="field">
+          <label for="fPingAt">Пинг в Telegram (когда)</label>
+          <input type="datetime-local" id="fPingAt" />
+        </div>
+        <div class="field">
+          <label for="fPingNote">Что написать / зачем пинг</label>
+          <input id="fPingNote" maxlength="280" placeholder="например: пост в Desk Club / проверить live-тик" />
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn danger ghost" id="btnDelete" hidden>Удалить</button>
+          <button type="button" class="btn ghost" id="btnCancel">Отмена</button>
+          <button type="submit" class="btn primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="settingsModal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="modal">
+      <h2 id="settingsTitle">Telegram-уведомления</h2>
+      <p class="hint">Токен и chat_id хранятся только в этом браузере (localStorage). Бот шлёт тебе личные напоминания по задачам с датой пинга.</p>
+      <form id="settingsForm">
+        <div class="field">
+          <label for="sToken">Bot token</label>
+          <input id="sToken" type="password" autocomplete="off" placeholder="123456:AA..." />
+        </div>
+        <div class="field">
+          <label for="sChat">Chat ID</label>
+          <input id="sChat" placeholder="твой числовой id" />
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="sBrowser" checked /> Браузерные уведомления</label>
+        </div>
+        <div class="field">
+          <label><input type="checkbox" id="sBot" /> Слать через Bot API</label>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" id="btnTestTg">Тест-сообщение</button>
+          <button type="button" class="btn ghost" id="btnSettingsCancel">Закрыть</button>
+          <button type="submit" class="btn primary">Сохранить</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="seed.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
