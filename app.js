@@ -56,12 +56,37 @@
     localStorage.setItem(SENT_KEY, JSON.stringify(sentPings));
   }
 
+  function migrateState(state) {
+    if (!state?.columns?.length) return state;
+    const tm = state.columns.find((c) => c.id === "trade-master");
+    const hubTrack = tm?.tracks?.find((t) => t.id === "hub");
+    const hasTgCol = state.columns.some((c) => c.id === "tg-hub");
+    if (hubTrack && !hasTgCol) {
+      tm.tracks = tm.tracks.filter((t) => t.id !== "hub");
+      if (tm.essence && tm.essence.includes("Telegram-сообщество")) {
+        tm.essence =
+          "Flutter-курс криптотрейдинга: уроки, paper, журнал, сторы. Web: pavelcrypto70.github.io. Репо: trading_education_app.";
+      }
+      const tmIdx = state.columns.findIndex((c) => c.id === "trade-master");
+      state.columns.splice(tmIdx + 1, 0, {
+        id: "tg-hub",
+        title: "Telegram-хаб",
+        accent: "sky",
+        essence:
+          "Desk Club / Academy: seed-посты, ежедневный ритм, домашки, Shorts → трафик в хаб. Каналы: @Desk_Club, @academy_trading_club, @trade_master_homework.",
+        tracks: [{ id: "hub", title: "Комьюнити", tasks: hubTrack.tasks || [] }],
+      });
+    }
+    state.version = Math.max(Number(state.version) || 1, 2);
+    return state;
+  }
+
   function loadState() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (parsed?.columns?.length) return parsed;
+        if (parsed?.columns?.length) return migrateState(parsed);
       }
     } catch (_) {}
     return bootstrapFromSeed();
@@ -538,6 +563,7 @@
   });
 
   state = loadState();
+  save();
   render();
   checkDuePings();
   setInterval(checkDuePings, 60_000);

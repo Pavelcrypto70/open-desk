@@ -1,6 +1,6 @@
 /** Seed из репозиториев EdgeBot + trading_education_app. RU / Sys — шаблоны. */
 window.DESK_SEED = {
-  version: 1,
+  version: 2,
   generatedFrom: [
     "Pavelcrypto70/EdgeBot",
     "Pavelcrypto70/trading_education_app",
@@ -91,7 +91,7 @@ window.DESK_SEED = {
       title: "Trade Master",
       accent: "amber",
       essence:
-        "Flutter-курс криптотрейдинга (уроки, paper, журнал) + Telegram-сообщество. Web: pavelcrypto70.github.io. Репо: trading_education_app.",
+        "Flutter-курс криптотрейдинга: уроки, paper, журнал, сторы. Web: pavelcrypto70.github.io. Репо: trading_education_app.",
       tracks: [
         {
           id: "app",
@@ -161,9 +161,18 @@ window.DESK_SEED = {
             },
           ],
         },
+      ],
+    },
+    {
+      id: "tg-hub",
+      title: "Telegram-хаб",
+      accent: "sky",
+      essence:
+        "Desk Club / Academy: seed-посты, ежедневный ритм, домашки, Shorts → трафик в хаб. Каналы: @Desk_Club, @academy_trading_club, @trade_master_homework.",
+      tracks: [
         {
           id: "hub",
-          title: "Telegram-хаб",
+          title: "Комьюнити",
           tasks: [
             {
               id: "tm-hub-1",
