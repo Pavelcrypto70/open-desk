@@ -2,6 +2,16 @@
   const STORAGE_KEY = "opsdesk.v1";
   const SETTINGS_KEY = "opsdesk.settings.v1";
   const SENT_KEY = "opsdesk.sentPings.v1";
+  const ACTIVE_COL_KEY = "opsdesk.activeCol.v1";
+  const TAB_SHORT = {
+    "trade-master": "TM",
+    "tg-hub": "TG",
+    promo: "Ads",
+    "ru-hub": "RU",
+    "sys-learn": "Sys",
+    edgebot: "Edge",
+  };
+  const COL_ORDER = ["trade-master", "tg-hub", "promo", "ru-hub", "sys-learn", "edgebot"];
 
   /** @type {any} */
   let state = null;
@@ -9,9 +19,11 @@
   let settings = loadSettings();
   /** @type {Record<string, number>} */
   let sentPings = loadSent();
+  let activeColId = sessionStorage.getItem(ACTIVE_COL_KEY) || "";
 
   const el = {
     board: document.getElementById("board"),
+    colTabs: document.getElementById("colTabs"),
     pingStrip: document.getElementById("pingStrip"),
     taskModal: document.getElementById("taskModal"),
     settingsModal: document.getElementById("settingsModal"),
@@ -22,6 +34,8 @@
     fTrack: document.getElementById("fTrack"),
     btnDelete: document.getElementById("btnDelete"),
     importFile: document.getElementById("importFile"),
+    moreSheet: document.getElementById("moreSheet"),
+    fabAdd: document.getElementById("fabAdd"),
   };
 
   function uid(prefix = "t") {
@@ -56,6 +70,67 @@
     localStorage.setItem(SENT_KEY, JSON.stringify(sentPings));
   }
 
+  function makePromoColumn(extraTasks = []) {
+    return {
+      id: "promo",
+      title: "Реклама и продвижение",
+      accent: "rose",
+      essence:
+        "Трафик и воронка в продукт / хаб: Shorts, Reels, посевы, креативы, UTM, бюджет. Не путать с ежедневным комьюнити в Telegram-хабе.",
+      tracks: [
+        {
+          id: "content-ads",
+          title: "Контент / креативы",
+          tasks: [
+            ...extraTasks,
+            {
+              id: "promo-2",
+              title: "Собрать пачку креативов (обложки / хуки / CTA)",
+              notes: "Форматы 9:16 и квадрат. Один оффер — одна ссылка с UTM.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+          ],
+        },
+        {
+          id: "channels",
+          title: "Каналы / посевы",
+          tasks: [
+            {
+              id: "promo-3",
+              title: "Список каналов / блогеров для посева (EN+PT+RU)",
+              notes: "Цена, охват, формат интеграции. Без спама.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+            {
+              id: "promo-4",
+              title: "UTM + трекинг кликов до хаба / стора",
+              notes: "Один дашборд: откуда пришли и что конвертнулось.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  function reorderColumns(cols) {
+    const byId = Object.fromEntries(cols.map((c) => [c.id, c]));
+    const ordered = [];
+    for (const id of COL_ORDER) {
+      if (byId[id]) ordered.push(byId[id]);
+    }
+    for (const c of cols) {
+      if (!COL_ORDER.includes(c.id)) ordered.push(c);
+    }
+    return ordered;
+  }
+
   function migrateState(state) {
     if (!state?.columns?.length) return state;
     const tm = state.columns.find((c) => c.id === "trade-master");
@@ -73,11 +148,66 @@
         title: "Telegram-хаб",
         accent: "sky",
         essence:
-          "Desk Club / Academy: seed-посты, ежедневный ритм, домашки, Shorts → трафик в хаб. Каналы: @Desk_Club, @academy_trading_club, @trade_master_homework.",
+          "Desk Club / Academy: seed-посты, ежедневный ритм, домашки. Каналы: @Desk_Club, @academy_trading_club, @trade_master_homework.",
         tracks: [{ id: "hub", title: "Комьюнити", tasks: hubTrack.tasks || [] }],
       });
     }
-    state.version = Math.max(Number(state.version) || 1, 2);
+
+    const tg = state.columns.find((c) => c.id === "tg-hub");
+    const movedAds = [];
+    if (tg?.tracks) {
+      for (const track of tg.tracks) {
+        const keep = [];
+        for (const task of track.tasks || []) {
+          if (task.id === "tm-hub-4" || /shorts|reels|реклам|продвижен/i.test(task.title || "")) {
+            movedAds.push(task);
+          } else {
+            keep.push(task);
+          }
+        }
+        track.tasks = keep;
+      }
+    }
+
+    if (!state.columns.some((c) => c.id === "promo")) {
+      const promo = makePromoColumn(
+        movedAds.length
+          ? movedAds
+          : [
+              {
+                id: "promo-1",
+                title: "3 Shorts/Reels → github.io + пост в @Desk_Club",
+                notes: "Цель: 10 платящих в первый месяц; 5 друзей на trial feedback.",
+                status: "open",
+                priority: 1,
+                telegramPing: null,
+              },
+            ]
+      );
+      if (movedAds.length) {
+        const contentTrack = promo.tracks.find((t) => t.id === "content-ads");
+        if (contentTrack) {
+          const ids = new Set(movedAds.map((t) => t.id));
+          contentTrack.tasks = [
+            ...movedAds,
+            ...contentTrack.tasks.filter((t) => !ids.has(t.id) && t.id !== "promo-1"),
+          ];
+        }
+      }
+      state.columns.push(promo);
+    } else if (movedAds.length) {
+      const promo = state.columns.find((c) => c.id === "promo");
+      const track = promo.tracks?.[0] || promo.tracks?.find((t) => t.id === "content-ads");
+      if (track) {
+        const have = new Set((track.tasks || []).map((t) => t.id));
+        for (const t of movedAds) {
+          if (!have.has(t.id)) track.tasks.unshift(t);
+        }
+      }
+    }
+
+    state.columns = reorderColumns(state.columns);
+    state.version = Math.max(Number(state.version) || 1, 3);
     return state;
   }
 
@@ -231,7 +361,46 @@
     </article>`;
   }
 
+  function ensureActiveCol() {
+    if (!state.columns.some((c) => c.id === activeColId)) {
+      activeColId = state.columns[0]?.id || "";
+    }
+    if (activeColId) sessionStorage.setItem(ACTIVE_COL_KEY, activeColId);
+  }
+
+  function setActiveCol(id) {
+    if (!state.columns.some((c) => c.id === id)) return;
+    activeColId = id;
+    sessionStorage.setItem(ACTIVE_COL_KEY, id);
+    applyActiveCol();
+    renderColTabs();
+  }
+
+  function applyActiveCol() {
+    el.board.dataset.activeCol = activeColId;
+    el.board.querySelectorAll(".column").forEach((node) => {
+      node.classList.toggle("is-active", node.dataset.col === activeColId);
+    });
+  }
+
+  function renderColTabs() {
+    ensureActiveCol();
+    el.colTabs.hidden = false;
+    el.colTabs.innerHTML = state.columns
+      .map((col) => {
+        const openN = countOpen(col);
+        const short = TAB_SHORT[col.id] || col.title.slice(0, 4);
+        const on = col.id === activeColId ? "is-active" : "";
+        return `<button type="button" class="col-tab ${on}" data-col-tab="${col.id}" data-accent="${col.accent}" aria-pressed="${col.id === activeColId}">
+          <span class="col-tab-name">${escapeHtml(short)}</span>
+          <span class="col-tab-count">${openN}</span>
+        </button>`;
+      })
+      .join("");
+  }
+
   function render() {
+    ensureActiveCol();
     el.board.innerHTML = state.columns
       .map((col) => {
         const openN = countOpen(col);
@@ -265,14 +434,15 @@
           })
           .join("");
 
-        return `<section class="column" data-accent="${col.accent}" data-col="${col.id}">
+        const active = col.id === activeColId ? "is-active" : "";
+        return `<section class="column ${active}" data-accent="${col.accent}" data-col="${col.id}">
           <div class="col-head">
             <div class="col-head-row">
               <div>
                 <h2 class="col-title">${escapeHtml(col.title)}</h2>
                 <div class="col-meta">${openN} открыто · ${doneN} закрыто</div>
               </div>
-              <button type="button" class="btn small" data-add="${col.id}:">+ задача</button>
+              <button type="button" class="btn small desktop-only" data-add="${col.id}:">+ задача</button>
             </div>
             <p class="essence" contenteditable="true" data-essence="${col.id}" spellcheck="true">${escapeHtml(col.essence)}</p>
           </div>
@@ -281,7 +451,25 @@
       })
       .join("");
 
+    el.board.dataset.activeCol = activeColId;
+    renderColTabs();
     renderPingStrip();
+  }
+
+  function openMore() {
+    el.moreSheet.hidden = false;
+    document.getElementById("btnMore")?.setAttribute("aria-expanded", "true");
+  }
+  function closeMore() {
+    el.moreSheet.hidden = true;
+    document.getElementById("btnMore")?.setAttribute("aria-expanded", "false");
+  }
+
+  function shiftActiveCol(delta) {
+    const idx = state.columns.findIndex((c) => c.id === activeColId);
+    if (idx < 0) return;
+    const next = state.columns[(idx + delta + state.columns.length) % state.columns.length];
+    setActiveCol(next.id);
   }
 
   function fillColumnSelect(selectedCol, selectedTrack) {
@@ -305,7 +493,7 @@
     document.getElementById("taskModalTitle").textContent = existing ? "Изменить задачу" : "Новая задача";
     el.btnDelete.hidden = !existing;
 
-    const colId = existing?.col.id || columnId || state.columns[0].id;
+    const colId = existing?.col.id || columnId || activeColId || state.columns[0].id;
     const trId = existing?.track.id || trackId || state.columns.find((c) => c.id === colId)?.tracks[0]?.id;
     fillColumnSelect(colId, trId);
 
@@ -393,6 +581,69 @@
   document.getElementById("btnSettings").addEventListener("click", openSettings);
   document.getElementById("btnCancel").addEventListener("click", closeTaskModal);
   document.getElementById("btnSettingsCancel").addEventListener("click", closeSettings);
+
+  el.fabAdd?.addEventListener("click", () => openTaskModal({ columnId: activeColId }));
+  document.getElementById("btnMore")?.addEventListener("click", openMore);
+  document.getElementById("btnMoreClose")?.addEventListener("click", closeMore);
+  el.moreSheet?.addEventListener("click", (e) => {
+    if (e.target === el.moreSheet) closeMore();
+  });
+
+  function wireReset(btn) {
+    btn?.addEventListener("click", () => {
+      closeMore();
+      if (!confirm("Сбросить дашборд к seed из репозиториев? Локальные правки пропадут.")) return;
+      state = bootstrapFromSeed();
+      save();
+      render();
+      toast("Seed загружен");
+    });
+  }
+  wireReset(document.getElementById("btnReset"));
+  wireReset(document.getElementById("btnResetM"));
+
+  document.getElementById("btnExportM")?.addEventListener("click", () => {
+    closeMore();
+    document.getElementById("btnExport").click();
+  });
+  document.getElementById("btnImportM")?.addEventListener("click", () => {
+    closeMore();
+    el.importFile.click();
+  });
+
+  el.colTabs.addEventListener("click", (e) => {
+    const tab = e.target.closest("[data-col-tab]");
+    if (tab) setActiveCol(tab.dataset.colTab);
+  });
+
+  {
+    let x0 = 0;
+    let y0 = 0;
+    let tracking = false;
+    el.board.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length !== 1) return;
+        tracking = true;
+        x0 = e.touches[0].clientX;
+        y0 = e.touches[0].clientY;
+      },
+      { passive: true }
+    );
+    el.board.addEventListener(
+      "touchend",
+      (e) => {
+        if (!tracking) return;
+        tracking = false;
+        const t = e.changedTouches[0];
+        const dx = t.clientX - x0;
+        const dy = t.clientY - y0;
+        if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+        shiftActiveCol(dx < 0 ? 1 : -1);
+      },
+      { passive: true }
+    );
+  }
 
   el.taskModal.addEventListener("click", (e) => {
     if (e.target === el.taskModal) closeTaskModal();
@@ -547,18 +798,11 @@
     }
   });
 
-  document.getElementById("btnReset").addEventListener("click", () => {
-    if (!confirm("Сбросить дашборд к seed из репозиториев? Локальные правки пропадут.")) return;
-    state = bootstrapFromSeed();
-    save();
-    render();
-    toast("Seed загружен");
-  });
-
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       closeTaskModal();
       closeSettings();
+      closeMore();
     }
   });
 

@@ -1,91 +1,11 @@
-/** Seed из репозиториев EdgeBot + trading_education_app. RU / Sys — шаблоны. */
+/** Seed из репозиториев EdgeBot + trading_education_app. RU / Sys / Promo — шаблоны. */
 window.DESK_SEED = {
-  version: 2,
+  version: 3,
   generatedFrom: [
     "Pavelcrypto70/EdgeBot",
     "Pavelcrypto70/trading_education_app",
   ],
   columns: [
-    {
-      id: "edgebot",
-      title: "EdgeBot",
-      accent: "teal",
-      essence:
-        "Bybit desk: скринер → MA (heavy/medium/fast) → OOS proof → whitelist → бумажный emulator + публичный Pages. Автономный скан ~час, live-тик по whitelist.",
-      tracks: [
-        {
-          id: "core",
-          title: "Ядро / live",
-          tasks: [
-            {
-              id: "eb-1",
-              title: "Проверить live v9: открытые бумажные позиции видны на Pages",
-              notes:
-                "Ветка live-v9-visible / merge на main. Символы вроде ZEC/MSTR/SNDK. Сверить trading.json vs UI.",
-              status: "open",
-              priority: 1,
-              telegramPing: null,
-            },
-            {
-              id: "eb-2",
-              title: "Стабилизировать цепочку тиков (cron 5m + EDGEBOT_TICK_TOKEN ~1m)",
-              notes:
-                "trading-live.yml: push-конфликты, queue next tick. Убедиться что секрет задан и тики не отваливаются ночью.",
-              status: "open",
-              priority: 1,
-              telegramPing: {
-                at: null,
-                note: "Пинг себе: «тик живой? посмотри Actions EdgeBot live»",
-              },
-            },
-            {
-              id: "eb-3",
-              title: "Решить судьбу medium/fast: оставить выкл. fast или вернуть осторожно",
-              notes:
-                "README: fast выключен в live. Были режимы heavy/medium/fast + pullback для fast. Зафиксировать политику в config/docs.",
-              status: "open",
-              priority: 2,
-              telegramPing: null,
-            },
-            {
-              id: "eb-4",
-              title: "Надёжность данных: Bybit 403 → OKX / Binance fallback",
-              notes:
-                "Actions US runners часто режут Bybit. Проверить что marks и klines не уходят в demo-бары без сигнала.",
-              status: "open",
-              priority: 2,
-              telegramPing: null,
-            },
-            {
-              id: "eb-5",
-              title: "Пересмотреть WL-гейты после heavy-only (тейк ≥1.8R, WR, OOS)",
-              notes:
-                "Гейты ужесточались (WR≥55% и т.п.). Сверить фактические пороги в коде vs README.",
-              status: "open",
-              priority: 2,
-              telegramPing: null,
-            },
-            {
-              id: "eb-6",
-              title: "Локальный NiceGUI UI: скринер / Proof MA / whitelist emulator",
-              notes: "ЗАПУСК_ЭКРАН.bat → :43123. Прогнать цикл Proof MA → Whitelist вручную.",
-              status: "open",
-              priority: 3,
-              telegramPing: null,
-            },
-            {
-              id: "eb-7",
-              title: "Путь к testnet/private trading (ключи уже в Secrets-схеме)",
-              notes:
-                ".env.example: BYBIT_API_KEY/SECRET. Пока public data + paper book. Следующий шаг — осознанный testnet.",
-              status: "open",
-              priority: 3,
-              telegramPing: null,
-            },
-          ],
-        },
-      ],
-    },
     {
       id: "trade-master",
       title: "Trade Master",
@@ -168,7 +88,7 @@ window.DESK_SEED = {
       title: "Telegram-хаб",
       accent: "sky",
       essence:
-        "Desk Club / Academy: seed-посты, ежедневный ритм, домашки, Shorts → трафик в хаб. Каналы: @Desk_Club, @academy_trading_club, @trade_master_homework.",
+        "Desk Club / Academy: seed-посты, ежедневный ритм, домашки. Каналы: @Desk_Club, @academy_trading_club, @trade_master_homework.",
       tracks: [
         {
           id: "hub",
@@ -205,10 +125,55 @@ window.DESK_SEED = {
               priority: 2,
               telegramPing: null,
             },
+          ],
+        },
+      ],
+    },
+    {
+      id: "promo",
+      title: "Реклама и продвижение",
+      accent: "rose",
+      essence:
+        "Трафик и воронка в продукт / хаб: Shorts, Reels, посевы, креативы, UTM, бюджет. Не путать с ежедневным комьюнити в Telegram-хабе.",
+      tracks: [
+        {
+          id: "content-ads",
+          title: "Контент / креативы",
+          tasks: [
             {
-              id: "tm-hub-4",
-              title: "Маркетинг: 3 Shorts/Reels → ссылка на github.io + пост в @Desk_Club",
+              id: "promo-1",
+              title: "3 Shorts/Reels → github.io + пост в @Desk_Club",
               notes: "Цель: 10 платящих в первый месяц; 5 друзей на trial feedback.",
+              status: "open",
+              priority: 1,
+              telegramPing: null,
+            },
+            {
+              id: "promo-2",
+              title: "Собрать пачку креативов (обложки / хуки / CTA)",
+              notes: "Форматы 9:16 и квадрат. Один оффер — одна ссылка с UTM.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+          ],
+        },
+        {
+          id: "channels",
+          title: "Каналы / посевы",
+          tasks: [
+            {
+              id: "promo-3",
+              title: "Список каналов / блогеров для посева (EN+PT+RU)",
+              notes: "Цена, охват, формат интеграции. Без спама.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+            {
+              id: "promo-4",
+              title: "UTM + трекинг кликов до хаба / стора",
+              notes: "Один дашборд: откуда пришли и что конвертнулось.",
               status: "open",
               priority: 2,
               telegramPing: null,
@@ -284,6 +249,86 @@ window.DESK_SEED = {
               notes: "",
               status: "open",
               priority: 2,
+              telegramPing: null,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: "edgebot",
+      title: "EdgeBot",
+      accent: "teal",
+      essence:
+        "Bybit desk: скринер → MA (heavy/medium/fast) → OOS proof → whitelist → бумажный emulator + публичный Pages. Автономный скан ~час, live-тик по whitelist.",
+      tracks: [
+        {
+          id: "core",
+          title: "Ядро / live",
+          tasks: [
+            {
+              id: "eb-1",
+              title: "Проверить live v9: открытые бумажные позиции видны на Pages",
+              notes:
+                "Ветка live-v9-visible / merge на main. Символы вроде ZEC/MSTR/SNDK. Сверить trading.json vs UI.",
+              status: "open",
+              priority: 1,
+              telegramPing: null,
+            },
+            {
+              id: "eb-2",
+              title: "Стабилизировать цепочку тиков (cron 5m + EDGEBOT_TICK_TOKEN ~1m)",
+              notes:
+                "trading-live.yml: push-конфликты, queue next tick. Убедиться что секрет задан и тики не отваливаются ночью.",
+              status: "open",
+              priority: 1,
+              telegramPing: {
+                at: null,
+                note: "Пинг себе: «тик живой? посмотри Actions EdgeBot live»",
+              },
+            },
+            {
+              id: "eb-3",
+              title: "Решить судьбу medium/fast: оставить выкл. fast или вернуть осторожно",
+              notes:
+                "README: fast выключен в live. Были режимы heavy/medium/fast + pullback для fast. Зафиксировать политику в config/docs.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+            {
+              id: "eb-4",
+              title: "Надёжность данных: Bybit 403 → OKX / Binance fallback",
+              notes:
+                "Actions US runners часто режут Bybit. Проверить что marks и klines не уходят в demo-бары без сигнала.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+            {
+              id: "eb-5",
+              title: "Пересмотреть WL-гейты после heavy-only (тейк ≥1.8R, WR, OOS)",
+              notes:
+                "Гейты ужесточались (WR≥55% и т.п.). Сверить фактические пороги в коде vs README.",
+              status: "open",
+              priority: 2,
+              telegramPing: null,
+            },
+            {
+              id: "eb-6",
+              title: "Локальный NiceGUI UI: скринер / Proof MA / whitelist emulator",
+              notes: "ЗАПУСК_ЭКРАН.bat → :43123. Прогнать цикл Proof MA → Whitelist вручную.",
+              status: "open",
+              priority: 3,
+              telegramPing: null,
+            },
+            {
+              id: "eb-7",
+              title: "Путь к testnet/private trading (ключи уже в Secrets-схеме)",
+              notes:
+                ".env.example: BYBIT_API_KEY/SECRET. Пока public data + paper book. Следующий шаг — осознанный testnet.",
+              status: "open",
+              priority: 3,
               telegramPing: null,
             },
           ],

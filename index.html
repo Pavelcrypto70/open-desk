@@ -2,7 +2,11 @@
 <html lang="ru">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="format-detection" content="telephone=no" />
   <title>Ops Desk · личный дашборд</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -15,22 +19,36 @@
   <div class="atmosphere" aria-hidden="true"></div>
   <div class="app">
     <header class="topbar">
-      <div>
+      <div class="topbar-brand">
         <div class="brand">OPS<span>DESK</span></div>
-        <p class="lede">Пять направлений. Текущие и закрытые задачи. Пинги в Telegram, чтобы ничего не сорвалось.</p>
+        <p class="lede">Trade Master → TG-хаб → реклама → RU → системный анализ. Пинги в Telegram, чтобы ничего не сорвалось.</p>
       </div>
       <div class="top-actions">
-        <button type="button" class="btn primary" id="btnAdd">+ Задача</button>
+        <button type="button" class="btn primary desktop-only" id="btnAdd">+ Задача</button>
         <button type="button" class="btn" id="btnSettings">Telegram</button>
-        <button type="button" class="btn ghost" id="btnExport">Экспорт</button>
-        <button type="button" class="btn ghost" id="btnImport">Импорт</button>
-        <button type="button" class="btn danger ghost" id="btnReset" title="Затереть локальные правки seed-ом">Сброс seed</button>
+        <button type="button" class="btn ghost desktop-only" id="btnExport">Экспорт</button>
+        <button type="button" class="btn ghost desktop-only" id="btnImport">Импорт</button>
+        <button type="button" class="btn danger ghost desktop-only" id="btnReset" title="Затереть локальные правки seed-ом">Сброс seed</button>
+        <button type="button" class="btn ghost mobile-only" id="btnMore" aria-expanded="false" aria-controls="moreSheet">⋯</button>
         <input type="file" id="importFile" accept="application/json,.json" hidden />
       </div>
     </header>
 
+    <nav class="col-tabs" id="colTabs" aria-label="Направления" hidden></nav>
     <div class="ping-strip" id="pingStrip" aria-label="Ближайшие Telegram-пинги"></div>
     <main class="board" id="board"></main>
+  </div>
+
+  <button type="button" class="fab mobile-only" id="fabAdd" aria-label="Новая задача">+</button>
+
+  <div class="sheet-backdrop mobile-only" id="moreSheet" hidden>
+    <div class="sheet" role="dialog" aria-label="Ещё">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <button type="button" class="sheet-item" id="btnExportM">Экспорт JSON</button>
+      <button type="button" class="sheet-item" id="btnImportM">Импорт JSON</button>
+      <button type="button" class="sheet-item danger" id="btnResetM">Сброс seed</button>
+      <button type="button" class="sheet-item muted" id="btnMoreClose">Закрыть</button>
+    </div>
   </div>
 
   <div class="modal-backdrop" id="taskModal" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
@@ -48,7 +66,7 @@
         </div>
         <div class="field">
           <label for="fTitle">Суть задачи</label>
-          <input id="fTitle" required maxlength="240" placeholder="Что сделать" />
+          <input id="fTitle" required maxlength="240" placeholder="Что сделать" autocomplete="off" />
         </div>
         <div class="field">
           <label for="fNotes">Заметки</label>
@@ -77,7 +95,7 @@
         </div>
         <div class="field">
           <label for="fPingNote">Что написать / зачем пинг</label>
-          <input id="fPingNote" maxlength="280" placeholder="например: пост в Desk Club / проверить live-тик" />
+          <input id="fPingNote" maxlength="280" placeholder="например: пост в Desk Club / проверить live-тик" autocomplete="off" />
         </div>
         <div class="modal-actions">
           <button type="button" class="btn danger ghost" id="btnDelete" hidden>Удалить</button>
@@ -99,7 +117,7 @@
         </div>
         <div class="field">
           <label for="sChat">Chat ID</label>
-          <input id="sChat" placeholder="твой числовой id" />
+          <input id="sChat" inputmode="numeric" placeholder="твой числовой id" autocomplete="off" />
         </div>
         <div class="field">
           <label><input type="checkbox" id="sBrowser" checked /> Браузерные уведомления</label>
